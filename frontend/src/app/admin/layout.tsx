@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Navigation from "@/components/layouts/Navigation";
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
+import "../globals.css"
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -72,12 +74,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Navigation userRole="admin" userName={user.name} />
-      <main>
-        <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-          {children}
+    <div className="min-h-screen bg-background">
+      {/* Admin Header */}
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+              <p className="text-muted-foreground">Trading Signal Management System</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-muted-foreground">
+                Angemeldet als <span className="font-medium">{user.name}</span>
+              </div>
+            </div>
+          </div>
         </div>
+      </header>
+
+      <main className="container mx-auto px-6 py-6">
+        {children}
       </main>
     </div>
   );
