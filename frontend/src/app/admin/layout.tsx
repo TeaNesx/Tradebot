@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
+import { ThemeSwitch } from "../../components/theme-switch";
 import "../globals.css"
 
 interface AdminLayoutProps {
@@ -83,10 +84,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <h1 className="text-2xl font-bold">Admin Dashboard</h1>
               <p className="text-muted-foreground">Trading Signal Management System</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <div className="text-sm text-muted-foreground">
                 Angemeldet als <span className="font-medium">{user.name}</span>
               </div>
+              <ThemeSwitch />
             </div>
           </div>
         </div>
