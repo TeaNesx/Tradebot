@@ -85,7 +85,8 @@ class LoginController extends Controller
         // Create a new token for the user
         $token = $user->createToken('auth_token')->plainTextToken;
         
-        return response()->json([
+        // Erstelle eine Antwort mit den Benutzerinformationen
+        $response = response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -95,6 +96,12 @@ class LoginController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
         ]);
+        
+        // Setze CORS-Header für die Antwort
+        $response->headers->set('Access-Control-Allow-Origin', $request->header('Origin'));
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
+        
+        return $response;
     }
     
     /**
@@ -123,12 +130,18 @@ class LoginController extends Controller
      */
     public function getAuthenticatedUser(Request $request)
     {
-        return response()->json([
+        $response = response()->json([
             'id' => $request->user()->id,
             'name' => $request->user()->name,
             'email' => $request->user()->email,
             'role' => $request->user()->role,
         ]);
+        
+        // Setze CORS-Header für die Antwort
+        $response->headers->set('Access-Control-Allow-Origin', $request->header('Origin'));
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
+        
+        return $response;
     }
     
     /**

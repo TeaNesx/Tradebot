@@ -17,10 +17,13 @@ export default function Login() {
     setError("");
 
     try {
+      // Füge withCredentials hinzu und setze explizite CORS-Header
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
         },
         credentials: "include",
         body: JSON.stringify({ email, password }),
@@ -32,6 +35,9 @@ export default function Login() {
         throw new Error(data.message || "Login fehlgeschlagen");
       }
 
+      // Token im localStorage speichern
+      localStorage.setItem('auth_token', data.access_token);
+      
       // Redirect based on user role
       if (data.user.role === "admin") {
         router.push("/admin/dashboard");

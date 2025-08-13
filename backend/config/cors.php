@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('NEXT_PUBLIC_APP_URL', 'http://tradebot.ddev.site')],
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 

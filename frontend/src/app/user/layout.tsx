@@ -22,8 +22,20 @@ export default function UserLayout({ children }: UserLayoutProps) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Token aus localStorage holen
+        const token = localStorage.getItem('auth_token');
+        
+        if (!token) {
+          throw new Error("Kein Authentifizierungstoken gefunden");
+        }
+        
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/user`, {
           credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "Authorization": `Bearer ${token}`
+          },
         });
 
         if (!response.ok) {

@@ -19,7 +19,11 @@ class CorsMiddleware
     {
         $response = $next($request);
         
-        $response->headers->set('Access-Control-Allow-Origin', env('NEXT_PUBLIC_APP_URL', 'https://tradebot.ddev.site'));
+        // Erlauben wir sowohl Frontend als auch API-Domain
+        $origin = $request->header('Origin');
+        if ($origin === 'https://tradebot.ddev.site' || $origin === 'http://tradebot.ddev.site') {
+            $response->headers->set('Access-Control-Allow-Origin', $origin);
+        }
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-XSRF-TOKEN');
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
