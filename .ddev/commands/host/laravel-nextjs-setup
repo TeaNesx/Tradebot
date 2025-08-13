@@ -1,0 +1,86 @@
+#!/bin/bash
+
+## Description: Set up Laravel + Next.js project from scratch
+## Usage: laravel-nextjs-setup [--force]
+
+[[ "$1" == "--force" ]] && FORCE=true || FORCE=false
+
+# Check if directories exist
+if [[ (-d "backend" || -d "frontend") && "$FORCE" != true ]]; then
+    echo "❌ Backend or frontend directories already exist. Use --force to overwrite."
+    exit 1
+fi
+
+echo "🚀 Setting up Laravel + Next.js project..."
+
+# Clean up if forcing
+[[ "$FORCE" == true ]] && rm -rf backend frontend
+
+# Create projects
+echo "📦 Creating Laravel backend..."
+ddev exec "composer create-project laravel/laravel backend"
+
+echo "📦 Creating Next.js frontend..."
+ddev exec "npx create-next-app@latest frontend --app --src-dir --import-alias '@/*' --no-git"
+
+# Configure Laravel .env (preserve APP_KEY, update DB & mail settings)
+echo "🔑 Configuring Laravel .env..."
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s|^DB_CONNECTION=.*|DB_CONNECTION=mysql|" backend/.env
+    sed -i '' "s|^# DB_HOST=.*|DB_HOST=db|" backend/.env
+    sed -i '' "s|^# DB_PORT=.*|DB_PORT=3306|" backend/.env
+    sed -i '' "s|^# DB_DATABASE=.*|DB_DATABASE=db|" backend/.env
+    sed -i '' "s|^# DB_USERNAME=.*|DB_USERNAME=db|" backend/.env
+    sed -i '' "s|^# DB_PASSWORD=.*|DB_PASSWORD=db|" backend/.env
+    sed -i '' "s|^APP_URL=.*|APP_URL=http://api.${DDEV_SITENAME}.ddev.site|" backend/.env
+    sed -i '' "s|^MAIL_HOST=.*|MAIL_HOST=mailpit|" backend/.env
+    sed -i '' "s|^MAIL_PORT=.*|MAIL_PORT=1025|" backend/.env
+else
+    sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=mysql|" backend/.env
+    sed -i "s|^# DB_HOST=.*|DB_HOST=db|" backend/.env
+    sed -i "s|^# DB_PORT=.*|DB_PORT=3306|" backend/.env
+    sed -i "s|^# DB_DATABASE=.*|DB_DATABASE=db|" backend/.env
+    sed -i "s|^# DB_USERNAME=.*|DB_USERNAME=db|" backend/.env
+    sed -i "s|^# DB_PASSWORD=.*|DB_PASSWORD=db|" backend/.env
+    sed -i "s|^APP_URL=.*|APP_URL=http://api.${DDEV_SITENAME}.ddev.site|" backend/.env
+    sed -i "s|^MAIL_HOST=.*|MAIL_HOST=mailpit|" backend/.env
+    sed -i "s|^MAIL_PORT=.*|MAIL_PORT=1025|" backend/.env
+fi
+
+# Configure Next.js .env.local
+echo "🔑 Configuring Next.js .env.local..."
+cat > frontend/.env.local << EOF
+NEXT_PUBLIC_API_URL=http://api.${DDEV_SITENAME}.ddev.site
+NEXT_PUBLIC_APP_URL=http://${DDEV_SITENAME}.ddev.site
+EOF
+
+# Update nginx config
+echo "🔧 Updating nginx configuration..."
+if [[ -f .ddev/nginx_full/nginx-site.conf ]]; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s/\${DDEV_SITENAME}/${DDEV_SITENAME}/g" .ddev/nginx_full/nginx-site.conf
+    else
+        sed -i "s/\${DDEV_SITENAME}/${DDEV_SITENAME}/g" .ddev/nginx_full/nginx-site.conf
+    fi
+fi
+
+# Restart and migrate
+echo "🔄 Restarting DDEV..."
+ddev restart
+
+echo "🗄️  Setting up database..."
+# Wait for database to be ready
+echo "   Waiting for database connection..."
+until ddev exec "mysql -h db -u db -pdb -e 'SELECT 1' >/dev/null 2>&1"; do
+    echo "   Database not ready, waiting..."
+    sleep 2
+done
+
+ddev exec "cd backend && php artisan session:table --quiet" 2>/dev/null || true
+ddev exec "cd backend && php artisan migrate --force"
+
+echo "✅ Setup complete!"
+echo ""
+echo "🌐 Your sites:"
+echo "   Frontend: https://${DDEV_SITENAME}.ddev.site"
+echo "   Backend:  https://api.${DDEV_SITENAME}.ddev.site"

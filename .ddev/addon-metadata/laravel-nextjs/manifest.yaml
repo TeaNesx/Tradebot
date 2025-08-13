@@ -1,0 +1,16 @@
+name: laravel-nextjs
+repository: ddev-laravel-nextjs
+version: ""
+install_date: "2025-08-13T09:04:12+02:00"
+project_files:
+    - nginx_full/nginx-site.conf
+    - commands/host/laravel-nextjs-setup
+    - commands/web/artisan
+    - commands/web/npm-frontend
+    - templates/.env.nextjs.example
+    - web-entrypoint.d/nextjs-start.sh
+global_files: []
+removal_actions:
+    - |
+      #ddev-description:Remove Laravel + Next.js configuration
+      echo "Laravel + Next.js addon removed. Backend and frontend directories preserved."
