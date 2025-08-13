@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
+import { LogOut } from "lucide-react";
 import { ThemeSwitch } from "../../components/theme-switch";
 import "../globals.css"
 
@@ -89,6 +90,39 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 Angemeldet als <span className="font-medium">{user.name}</span>
               </div>
               <ThemeSwitch />
+              <button
+                onClick={async () => {
+                  try {
+                    // API-Aufruf zum Abmelden
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                      }
+                    });
+                    
+                    if (response.ok) {
+                      // Token aus dem localStorage entfernen
+                      localStorage.removeItem("token");
+                      // Zur Login-Seite weiterleiten
+                      window.location.href = "https://tradebot.ddev.site/auth/login";
+                    } else {
+                      console.error('Fehler beim Abmelden');
+                    }
+                  } catch (error) {
+                    console.error('Fehler beim Abmelden:', error);
+                    // Bei Fehler trotzdem lokales Token entfernen und zur Login-Seite weiterleiten
+                    localStorage.removeItem("token");
+                    window.location.href = "https://tradebot.ddev.site/auth/login";
+                  }
+                }}
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+                title="Abmelden"
+              >
+                <LogOut size={16} />
+                <span>Abmelden</span>
+              </button>
             </div>
           </div>
         </div>
